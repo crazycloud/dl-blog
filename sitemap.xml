@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-<loc>https://crazycloud.github.io/dl-blog/markdown/2020/01/14/test-markdown-post.html</loc>
+<loc>http://forgetfulcrow.com/markdown/2020/01/14/test-markdown-post.html</loc>
 <lastmod>2020-01-14T00:00:00-06:00</lastmod>
 </url>
 <url>
-<loc>https://crazycloud.github.io/dl-blog/jupyter/2020/02/20/test.html</loc>
+<loc>http://forgetfulcrow.com/jupyter/2020/02/20/test.html</loc>
 <lastmod>2020-02-20T00:00:00-06:00</lastmod>
 </url>
 <url>
-<loc>https://crazycloud.github.io/dl-blog/detectron2/fasterrcnn/vision/2020/04/09/Handwritten-Text-Detection-in-Detectron2.html</loc>
+<loc>http://forgetfulcrow.com/detectron2/fasterrcnn/vision/2020/04/09/Handwritten-Text-Detection-in-Detectron2.html</loc>
 <lastmod>2020-04-09T00:00:00-05:00</lastmod>
 </url>
 <url>
-<loc>https://crazycloud.github.io/dl-blog/about/</loc>
+<loc>http://forgetfulcrow.com/about/</loc>
 </url>
 <url>
-<loc>https://crazycloud.github.io/dl-blog/</loc>
+<loc>http://forgetfulcrow.com/</loc>
 </url>
 <url>
-<loc>https://crazycloud.github.io/dl-blog/search/</loc>
+<loc>http://forgetfulcrow.com/search/</loc>
 </url>
 <url>
-<loc>https://crazycloud.github.io/dl-blog/categories/</loc>
+<loc>http://forgetfulcrow.com/categories/</loc>
 </url>
 </urlset>
