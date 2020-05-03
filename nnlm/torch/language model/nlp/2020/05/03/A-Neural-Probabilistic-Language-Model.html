@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>A Neural Probabilistic Language Model | forgetfulcrow</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="A Neural Probabilistic Language Model" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Musings on AI, Life, and apparently Trivial matters" />
+<meta property="og:description" content="Musings on AI, Life, and apparently Trivial matters" />
+<link rel="canonical" href="http://forgetfulcrow.com/nnlm/torch/language%20model/nlp/2020/05/03/A-Neural-Probabilistic-Language-Model.html" />
+<meta property="og:url" content="http://forgetfulcrow.com/nnlm/torch/language%20model/nlp/2020/05/03/A-Neural-Probabilistic-Language-Model.html" />
+<meta property="og:site_name" content="forgetfulcrow" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-03T00:00:00-05:00" />
+<script type="application/ld+json">
+{"description":"Musings on AI, Life, and apparently Trivial matters","@type":"BlogPosting","headline":"A Neural Probabilistic Language Model","url":"http://forgetfulcrow.com/nnlm/torch/language%20model/nlp/2020/05/03/A-Neural-Probabilistic-Language-Model.html","datePublished":"2020-05-03T00:00:00-05:00","dateModified":"2020-05-03T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://forgetfulcrow.com/nnlm/torch/language%20model/nlp/2020/05/03/A-Neural-Probabilistic-Language-Model.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://forgetfulcrow.com/feed.xml" title="forgetfulcrow" /><link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>A Neural Probabilistic Language Model | forgetfulcrow</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="A Neural Probabilistic Language Model" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Musings on AI, Life, and apparently Trivial matters" />
+<meta property="og:description" content="Musings on AI, Life, and apparently Trivial matters" />
+<link rel="canonical" href="http://forgetfulcrow.com/nnlm/torch/language%20model/nlp/2020/05/03/A-Neural-Probabilistic-Language-Model.html" />
+<meta property="og:url" content="http://forgetfulcrow.com/nnlm/torch/language%20model/nlp/2020/05/03/A-Neural-Probabilistic-Language-Model.html" />
+<meta property="og:site_name" content="forgetfulcrow" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-03T00:00:00-05:00" />
+<script type="application/ld+json">
+{"description":"Musings on AI, Life, and apparently Trivial matters","@type":"BlogPosting","headline":"A Neural Probabilistic Language Model","url":"http://forgetfulcrow.com/nnlm/torch/language%20model/nlp/2020/05/03/A-Neural-Probabilistic-Language-Model.html","datePublished":"2020-05-03T00:00:00-05:00","dateModified":"2020-05-03T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://forgetfulcrow.com/nnlm/torch/language%20model/nlp/2020/05/03/A-Neural-Probabilistic-Language-Model.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
+<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="http://forgetfulcrow.com/feed.xml" title="forgetfulcrow" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head><body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">forgetfulcrow</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About Me</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">A Neural Probabilistic Language Model</h1><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-05-03T00:00:00-05:00" itemprop="datePublished">
+        May 3, 2020
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      5 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/categories/#nnlm">nnlm</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#torch">torch</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#language model">language model</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#nlp">nlp</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/crazycloud/dl-blog/tree/master/_notebooks/2020-05-03-A Neural Probabilistic Language Model.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/crazycloud/dl-blog/master?filepath=_notebooks%2F2020-05-03-A+Neural+Probabilistic+Language+Model.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/crazycloud/dl-blog/blob/master/_notebooks/2020-05-03-A Neural Probabilistic Language Model.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h2"><a href="#Language-Modeling">Language Modeling </a></li>
+<li class="toc-entry toc-h2"><a href="#Unseen-Word-sequences">Unseen Word sequences </a></li>
+<li class="toc-entry toc-h2"><a href="#N-gram-assumption">N-gram assumption </a></li>
+<li class="toc-entry toc-h2"><a href="#Back-off-and-Smoothed-Models">Back-off and Smoothed Models </a></li>
+<li class="toc-entry toc-h2"><a href="#Bengio's-NNLM-paper">Bengio&#39;s NNLM paper </a></li>
+<li class="toc-entry toc-h2"><a href="#Previous-Work">Previous Work </a></li>
+<li class="toc-entry toc-h2"><a href="#Implementation">Implementation </a></li>
+<li class="toc-entry toc-h2"><a href="#How-word2vec-improves-on-the-NNLM-model?">How word2vec improves on the NNLM model? </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2020-05-03-A Neural Probabilistic Language Model.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will go through the paper by Yoshua Bengio - <a href="http://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf">A Neural Probabilistic Language Model</a></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Language-Modeling">
+<a class="anchor" href="#Language-Modeling" aria-hidden="true"><span class="octicon octicon-link"></span></a>Language Modeling<a class="anchor-link" href="#Language-Modeling"> </a>
+</h2>
+<p>In language modeling task we try to learn the joint probability function of word sequences p(w1 w2 .. wm).</p>
+<p>p(w1 w2 .. wm) = count(w1 w2 .. wm) / count(all m-gram word seq)</p>
+<h2 id="Unseen-Word-sequences">
+<a class="anchor" href="#Unseen-Word-sequences" aria-hidden="true"><span class="octicon octicon-link"></span></a>Unseen Word sequences<a class="anchor-link" href="#Unseen-Word-sequences"> </a>
+</h2>
+<p>Calculating joint probability is difficult becuase it involves counting all the m-word sequences and also, it doesn't generalize well on unseen word sequences.</p>
+<p>What will happen to the word sequences we have not seen during the modeling time? We will assign a zero probability to all such sequences.</p>
+<p>We use probability chain formula to frame the joint probability as a product of conditional probabilities. We define joint probability as product of conditional probabilities as follows</p>
+<p>p(w1 w2 ..wm) = p(w1) p(w2|w1) p(w3|w2w1) .. p(wm|w1..wm-1)</p>
+<p>Calculating conditional probability is comparatively easy.<br>
+p(w3|w2 w1) = count(w1 w2 w2)/count(w1 w2)</p>
+<p>But still we have the same problem when calculating conditional probability of long word sequences - it is highly likely that we won't have seen such long sequence of exact words during the modeling time. How do we handle this?</p>
+<h2 id="N-gram-assumption">
+<a class="anchor" href="#N-gram-assumption" aria-hidden="true"><span class="octicon octicon-link"></span></a>N-gram assumption<a class="anchor-link" href="#N-gram-assumption"> </a>
+</h2>
+<p>Linguists have observed that a word depends only n previous words and not all the words before it. This is the n-gram or Markov assumption. This simplifies the function p(wm|w1 w2..wm-1) into p(wm| wm-n ..wm-1). If we make a trigram(n=3) assumption, which is popular in statistical language modeling, it becomes p(wm| wm-1 wm-2), i.e. each word is assumed to be dependent on only last two words in the sequence.</p>
+<h2 id="Back-off-and-Smoothed-Models">
+<a class="anchor" href="#Back-off-and-Smoothed-Models" aria-hidden="true"><span class="octicon octicon-link"></span></a>Back-off and Smoothed Models<a class="anchor-link" href="#Back-off-and-Smoothed-Models"> </a>
+</h2>
+<p>To further improve the generalization on unseen word sequences, there a few more bag of tricks like back-off trigram model where if p(w4|w3 w2) is not known to us, we consider futher smaller sequences until we find the required probability. We look at p(w4|w3) if it is available, else we look at p(w4). Also, we use smoothed trigram model to distribute the probability mass.</p>
+<h2 id="Bengio's-NNLM-paper">
+<a class="anchor" href="#Bengio's-NNLM-paper" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bengio's NNLM paper<a class="anchor-link" href="#Bengio's-NNLM-paper"> </a>
+</h2>
+<p>It addresses two problems with the traditional statistical language modelling</p>
+<ol>
+<li>Curse of Dimensionality<br>
+To model a joint distribution of 10-gram word sequence of 10,000 words vocabulary, there are 10,000^10 -1 free parameters required. When modeling continous variables, we obtain generalization more easily because function to be learned is expected to have some local smoothness, i.e. if we have smoothness property for language modeling task, we should be able to use some local smoothness to generalize the model to unseen word sequences. 
+If we have seen a word sequence "The cat is walking in the bedroom", it should be able to generalize to simliar word sequence like "A dog was running in the room" as "dog" and "cat" have similar semantic and grammatic roles.      The generalization in the statistical language modeling is obtained by gluing together(product of conditional probabilities) the short subsequneces. Typically, trigrams were considered becuase of the curse of dimensionality. It doesn't take in to account more than 1-2 previous words.</li>
+</ol>
+<ol>
+<li>Not taking into account similarity between words<br>
+The big problem in language modeling is generalization. If the model understands the semantic simliary between words, it will generalize better.</li>
+</ol>
+<h2 id="Previous-Work">
+<a class="anchor" href="#Previous-Work" aria-hidden="true"><span class="octicon octicon-link"></span></a>Previous Work<a class="anchor-link" href="#Previous-Work"> </a>
+</h2>
+<ul>
+<li>
+<p><b>Neural Networks for Modeling Joint Probability Distribution-</b> Neural networks have been used to model the joint probability distribution of random variables and also for lanugage modeling before this paper. Each output node spits the conditional probability of a word give the sequence of words as input.</p>
+</li>
+<li>
+<p><b>Word Similarities</b> Discovering the word simliarties to obtain generalization has been tried as well, by clustering similar words together but the model proposed by Bengio learns the distributed feature vector to represent word similarty.</p>
+</li>
+<li>
+<p><b>Vector space representation of words -</b>The previous works in information retrieval has explored the vector-space representation of words(LSI) but this paper explores the reprsentation of words which helps in representing the probability distribution of the word sequences. The paper mentions that learning the word representation and probability distribution jointly is very useful.</p>
+</li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="/images/copied_from_nb/nnlm.png" alt="NNLM Model"></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Implementation">
+<a class="anchor" href="#Implementation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Implementation<a class="anchor-link" href="#Implementation"> </a>
+</h2>
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">torch.optim</span> <span class="k">as</span> <span class="nn">optim</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">corpus</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'i like dog'</span><span class="p">,</span> <span class="s1">'i love coffee'</span><span class="p">,</span> <span class="s1">'i hate milk'</span><span class="p">]</span>  <span class="c1"># list of all the sentences</span>
+<span class="n">vocabulary</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">corpus</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>  <span class="c1"># |v| list of all the uwords</span>
+<span class="n">word2int</span> <span class="o">=</span> <span class="p">{</span><span class="n">w</span><span class="p">:</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vocabulary</span><span class="p">)}</span>
+<span class="n">corpus</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'i like dog'</span><span class="p">,</span> <span class="s1">'i love coffee'</span><span class="p">,</span> <span class="s1">'i hate milk'</span><span class="p">]</span>  <span class="c1"># list of all the sentences</span>
+<span class="n">vocabulary</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">corpus</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>  <span class="c1"># |v| list of all the uwords</span>
+<span class="n">n_vocab</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vocabulary</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">NNLM</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NNLM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># projection layer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">n_vocab</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+
+        <span class="c1"># hidden layer</span>
+        <span class="c1"># tanh(XH + d)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_step</span> <span class="o">*</span> <span class="n">m</span><span class="p">,</span>
+                              <span class="n">n_hidden</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> \
+            <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_hidden</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">))</span>
+
+        <span class="c1"># hidden layer</span>
+        <span class="c1"># WX + b</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_step</span> <span class="o">*</span> <span class="n">m</span><span class="p">,</span>
+                              <span class="n">n_vocab</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> \
+            <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_vocab</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">))</span>
+
+        <span class="c1"># tanh U</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_hidden</span><span class="p">,</span>
+                              <span class="n">n_vocab</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>  <span class="c1"># (batch_size, n_step, m)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_step</span> <span class="o">*</span> <span class="n">m</span><span class="p">)</span>  <span class="c1"># (batch_size, n_step * m)</span>
+        <span class="n">tanh</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">))</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">tanh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">)</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+
+<span class="k">def</span> <span class="nf">prepare_input</span><span class="p">(</span><span class="n">sentences</span><span class="p">):</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">sentences</span><span class="p">:</span>
+        <span class="n">sent</span> <span class="o">=</span> <span class="n">sent</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">word2int</span><span class="p">[</span><span class="n">word</span><span class="p">]</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">sent</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="n">Y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word2int</span><span class="p">[</span><span class="n">sent</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">prepare_input</span><span class="p">(</span><span class="n">corpus</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">n_step</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">n_hidden</span> <span class="o">=</span><span class="mi">2</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">NNLM</span><span class="p">()</span>
+<span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5000</span><span class="p">):</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="c1"># output : [batch_size, n_class], target_batch : [batch_size] (LongTensor, not one-hot)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="k">1000</span> == 0:
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'Epoch:'</span><span class="p">,</span> <span class="s1">'</span><span class="si">%04d</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="s1">'cost ='</span><span class="p">,</span> <span class="s1">'</span><span class="si">{:.6f}</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">loss</span><span class="p">))</span>
+
+    <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Epoch: 1000 cost = 0.207585
+Epoch: 2000 cost = 0.035829
+Epoch: 3000 cost = 0.012441
+Epoch: 4000 cost = 0.005522
+Epoch: 5000 cost = 0.002739
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">input</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
+    <span class="nb">input</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">vocabulary</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">w</span><span class="p">])</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">o</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="p">[</span><span class="n">vocabulary</span><span class="p">[</span><span class="n">pred</span><span class="p">]</span> <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="n">predictions</span><span class="p">]):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'Input: '</span><span class="o">+</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'Output:'</span><span class="p">,</span><span class="n">o</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Input: i like
+Output: dog
+
+
+Input: i love
+Output: coffee
+
+
+Input: i hate
+Output: milk
+
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="How-word2vec-improves-on-the-NNLM-model?">
+<a class="anchor" href="#How-word2vec-improves-on-the-NNLM-model?" aria-hidden="true"><span class="octicon octicon-link"></span></a>How word2vec improves on the NNLM model?<a class="anchor-link" href="#How-word2vec-improves-on-the-NNLM-model?"> </a>
+</h2>
+<p>The embedding to hidden and hidden to softmax layers are expensive in NNLM network. The softmax layers has 300*|V| weights. For a vocabulary of 10,000 words, the number of weights will be approx 3 million. Word2vec simplifies the NNLM model in few ways.</p>
+<ul>
+<li>use negative sampling to update only a fraction of 3M weights in output layer.</li>
+<li>modeling a binary classification instead of next word prediction model</li>
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="crazycloud/dl-blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/nnlm/torch/language%20model/nlp/2020/05/03/A-Neural-Probabilistic-Language-Model.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>Musings on AI, Life, and apparently Trivial matters</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/crazycloud" title="crazycloud"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
