@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Entity Extraction (NER) - Training and Inference using HuggingFace Transformers Library - Part 2 | forgetfulcrow</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="Entity Extraction (NER) - Training and Inference using HuggingFace Transformers Library - Part 2" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function" />
+<meta property="og:description" content="Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function" />
+<link rel="canonical" href="http://forgetfulcrow.com/nlp/token%20classification/2020/09/19/_09_20_Entity_Extraction_Transformers_Part_2.html" />
+<meta property="og:url" content="http://forgetfulcrow.com/nlp/token%20classification/2020/09/19/_09_20_Entity_Extraction_Transformers_Part_2.html" />
+<meta property="og:site_name" content="forgetfulcrow" />
+<meta property="og:image" content="http://forgetfulcrow.com/images/transformers-ner-part2.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-09-19T00:00:00-05:00" />
+<script type="application/ld+json">
+{"description":"Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function","@type":"BlogPosting","headline":"Entity Extraction (NER) - Training and Inference using HuggingFace Transformers Library - Part 2","url":"http://forgetfulcrow.com/nlp/token%20classification/2020/09/19/_09_20_Entity_Extraction_Transformers_Part_2.html","datePublished":"2020-09-19T00:00:00-05:00","dateModified":"2020-09-19T00:00:00-05:00","image":"http://forgetfulcrow.com/images/transformers-ner-part2.png","mainEntityOfPage":{"@type":"WebPage","@id":"http://forgetfulcrow.com/nlp/token%20classification/2020/09/19/_09_20_Entity_Extraction_Transformers_Part_2.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://forgetfulcrow.com/feed.xml" title="forgetfulcrow" /><link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Entity Extraction (NER) - Training and Inference using HuggingFace Transformers Library - Part 2 | forgetfulcrow</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="Entity Extraction (NER) - Training and Inference using HuggingFace Transformers Library - Part 2" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function" />
+<meta property="og:description" content="Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function" />
+<link rel="canonical" href="http://forgetfulcrow.com/nlp/token%20classification/2020/09/19/_09_20_Entity_Extraction_Transformers_Part_2.html" />
+<meta property="og:url" content="http://forgetfulcrow.com/nlp/token%20classification/2020/09/19/_09_20_Entity_Extraction_Transformers_Part_2.html" />
+<meta property="og:site_name" content="forgetfulcrow" />
+<meta property="og:image" content="http://forgetfulcrow.com/images/transformers-ner-part2.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-09-19T00:00:00-05:00" />
+<script type="application/ld+json">
+{"description":"Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function","@type":"BlogPosting","headline":"Entity Extraction (NER) - Training and Inference using HuggingFace Transformers Library - Part 2","url":"http://forgetfulcrow.com/nlp/token%20classification/2020/09/19/_09_20_Entity_Extraction_Transformers_Part_2.html","datePublished":"2020-09-19T00:00:00-05:00","dateModified":"2020-09-19T00:00:00-05:00","image":"http://forgetfulcrow.com/images/transformers-ner-part2.png","mainEntityOfPage":{"@type":"WebPage","@id":"http://forgetfulcrow.com/nlp/token%20classification/2020/09/19/_09_20_Entity_Extraction_Transformers_Part_2.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
+<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="http://forgetfulcrow.com/feed.xml" title="forgetfulcrow" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head><body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">forgetfulcrow</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About Me</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Entity Extraction (NER) - Training and Inference using HuggingFace Transformers Library - Part 2</h1><p class="page-description">Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-09-19T00:00:00-05:00" itemprop="datePublished">
+        Sep 19, 2020
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      10 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/categories/#nlp">nlp</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#token classification">token classification</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/crazycloud/dl-blog/tree/master/_notebooks/2020_09_20_Entity_Extraction_Transformers_Part_2.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/crazycloud/dl-blog/master?filepath=_notebooks%2F2020_09_20_Entity_Extraction_Transformers_Part_2.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/crazycloud/dl-blog/blob/master/_notebooks/2020_09_20_Entity_Extraction_Transformers_Part_2.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h2"><a href="#Fine-Tuning-Token-Classification-Model">Fine Tuning Token Classification Model </a></li>
+<li class="toc-entry toc-h2"><a href="#Installation">Installation </a></li>
+<li class="toc-entry toc-h2"><a href="#Prepare-the-Training-Data">Prepare the Training Data </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Split-the-dataset-into-Train-and-Test-using-sklearn">Split the dataset into Train and Test using sklearn </a></li>
+<li class="toc-entry toc-h3"><a href="#Download-Finetuning-Code-from-Transformers-Package">Download Finetuning Code from Transformers Package </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#Training-Code">Training Code </a></li>
+<li class="toc-entry toc-h2"><a href="#Model-Prediction">Model Prediction </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2020_09_20_Entity_Extraction_Transformers_Part_2.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a href="https://colab.research.google.com/github/crazycloud/dl-blog/blob/master/_notebooks/2020_09_20_Entity_Extraction_Transformers_Part_2.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In the Part-1, we talked about how to use the pretrained language model, Tokenizer and TokenClassification model.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Fine-Tuning-Token-Classification-Model">
+<a class="anchor" href="#Fine-Tuning-Token-Classification-Model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Fine Tuning Token Classification Model<a class="anchor-link" href="#Fine-Tuning-Token-Classification-Model"> </a>
+</h2>
+<p>Steps for Finetuning TC Model</p>
+<p><strong>Step 1.</strong> Dataset - Get labelled dataset for training and testing. For token classification, we need word level labels like following</p>
+<ul>
+<li>
+<code>The</code> O  </li>
+<li>
+<code>battery</code> Aspect</li>
+<li>
+<code>of</code> O </li>
+<li>
+<code>the</code> O  </li>
+<li>
+<code>speaker</code> O </li>
+<li>
+<code>is</code> O </li>
+<li>
+<code>very</code> Sentiment</li>
+<li>
+<code>poor</code> Sentiment</li>
+</ul>
+<p>We need train.txt, test.txt and labels.txt file to finetune the model, and to verify the performance of the model.</p>
+<p>train.txt/test.txt - word and corresponding label per line and a blank line between each example.</p>
+<p>labels.txt - list of unique tags that we have labelled in the train.txt and test.txt</p>
+<p><strong>Step 2.</strong> If the data is in any other format, we have to either convert it into this format, or write a new Task class and implement the methods of <a href="https://github.com/huggingface/transformers/blob/4f6e52574248636352a746cfe6cc0b13cf3eb7f9/examples/token-classification/tasks.py#L13">TokenClassificationTask</a></p>
+<p>For this example, we will use the Task class NER in the <a href="https://github.com/huggingface/transformers/blob/4f6e52574248636352a746cfe6cc0b13cf3eb7f9/examples/token-classification/tasks.py#L13">tasks.py</a> file. This will prepare the list of InputExample</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">InputExample</span><span class="p">:</span>
+    <span class="sd">"""</span>
+<span class="sd">    A single training/test example for token classification.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        guid: Unique id for the example.</span>
+<span class="sd">        words: list. The words of the sequence.</span>
+<span class="sd">        labels: (Optional) list. The labels for each word of the sequence. This should be</span>
+<span class="sd">        specified for train and dev examples, but not for test examples.</span>
+<span class="sd">    """</span>
+
+    <span class="n">guid</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">words</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+</pre></div>
+<p><strong>Step 3.</strong> NER class extends the <a href="https://github.com/huggingface/transformers/blob/4f6e52574248636352a746cfe6cc0b13cf3eb7f9/examples/token-classification/utils_ner.py#L68">TokenClassificationTask</a> class which has a method <code>convert_examples_to_features</code> to convert list of example in to input features</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">InputFeatures</span><span class="p">:</span>
+    <span class="sd">"""</span>
+<span class="sd">    A single set of features of data.</span>
+<span class="sd">    Property names are the same names as the corresponding inputs to a model.</span>
+<span class="sd">    """</span>
+
+    <span class="n">input_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="n">attention_mask</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="n">token_type_ids</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">label_ids</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+<p>This method convert_examples_to_features uses the Tokenizer class to convert InputExample into InputFeature. In the Part-1 we discussed about the Tokenizer and how to prepate input for the model.</p>
+<p><strong>Step 4.</strong> Convert InputFeatures into Pytorch Dataset. The utils_ner.py has a function to convert InputFeatures into Dataset required for training.</p>
+<p><strong>Step 5.</strong> Call the Trainer class in run_ner.py which trains the model and evaluates the model.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Installation">
+<a class="anchor" href="#Installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation<a class="anchor-link" href="#Installation"> </a>
+</h2>
+<p>Install the latest transformers library</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>pip install git+https://github.com/huggingface/transformers.git
+<span class="o">!</span>pip install seqeval
+<span class="o">!</span>pip install conllu
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">google.colab</span> <span class="kn">import</span> <span class="n">drive</span>
+<span class="n">drive</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s1">'/content/drive'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Mounted at /content/drive
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Prepare-the-Training-Data">
+<a class="anchor" href="#Prepare-the-Training-Data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Prepare the Training Data<a class="anchor-link" href="#Prepare-the-Training-Data"> </a>
+</h2>
+<p>Download the dataset from <a href="https://www.kaggle.com/abhinavwalia95/entity-annotated-corpus">https://www.kaggle.com/abhinavwalia95/entity-annotated-corpus</a></p>
+<p>download the file <code>new_dataset.csv</code></p>
+<p>Let's load the dataset in pandas dataframe and look at the data</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">data_path</span> <span class="o">=</span> <span class="s1">'/content/drive/My Drive/transformers-ner/ner_dataset.csv'</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"latin-1"</span><span class="p">)</span>
+
+<span class="c1"># fille the empty Sentence# with the previous available value</span>
+<span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"Sentence #"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"Sentence #"</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">"ffill"</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Sentence #</th>
+      <th>Word</th>
+      <th>POS</th>
+      <th>Tag</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Sentence: 1</td>
+      <td>Thousands</td>
+      <td>NNS</td>
+      <td>O</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Sentence: 1</td>
+      <td>of</td>
+      <td>IN</td>
+      <td>O</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Sentence: 1</td>
+      <td>demonstrators</td>
+      <td>NNS</td>
+      <td>O</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Sentence: 1</td>
+      <td>have</td>
+      <td>VBP</td>
+      <td>O</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Sentence: 1</td>
+      <td>marched</td>
+      <td>VBN</td>
+      <td>O</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sentences</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"Sentence #"</span><span class="p">)[</span><span class="s2">"Word"</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+<span class="n">tags</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"Sentence #"</span><span class="p">)[</span><span class="s2">"Tag"</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">sentences</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>['Thousands', 'of', 'demonstrators', 'have', 'marched', 'through', 'London', 'to', 'protest', 'the', 'war', 'in', 'Iraq', 'and', 'demand', 'the', 'withdrawal', 'of', 'British', 'troops', 'from', 'that', 'country', '.']
+['O', 'O', 'O', 'O', 'O', 'O', 'B-geo', 'O', 'O', 'O', 'O', 'O', 'B-geo', 'O', 'O', 'O', 'O', 'O', 'B-gpe', 'O', 'O', 'O', 'O', 'O']
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Split-the-dataset-into-Train-and-Test-using-sklearn">
+<a class="anchor" href="#Split-the-dataset-into-Train-and-Test-using-sklearn" aria-hidden="true"><span class="octicon octicon-link"></span></a>Split the dataset into Train and Test using sklearn<a class="anchor-link" href="#Split-the-dataset-into-Train-and-Test-using-sklearn"> </a>
+</h3>
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="c1">#split into 80% train and 20% test</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">sentences</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">TRAIN_FILE_PATH</span> <span class="o">=</span> <span class="s1">'/content/drive/My Drive/transformers-ner/data/train.txt'</span>
+<span class="n">TEST_FILE_PATH</span> <span class="o">=</span> <span class="s1">'/content/drive/My Drive/transformers-ner/data/test.txt'</span>
+<span class="n">LABELS_FILE_PATH</span> <span class="o">=</span> <span class="s1">'/content/drive/My Drive/transformers-ner/data/labels.txt'</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">TRAIN_FILE_PATH</span><span class="p">,</span><span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">ftrain</span><span class="p">:</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">):</span>
+    <span class="p">[</span><span class="n">ftrain</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">s</span><span class="o">+</span><span class="s1">' '</span><span class="o">+</span><span class="n">t</span><span class="o">+</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)]</span>
+    <span class="n">ftrain</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">TEST_FILE_PATH</span><span class="p">,</span><span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">ftest</span><span class="p">:</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">):</span>
+    <span class="p">[</span><span class="n">ftest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">s</span><span class="o">+</span><span class="s1">' '</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">+</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)]</span>
+    <span class="n">ftest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Prepare the labels file with list of unique labels</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">LABELS_FILE_PATH</span><span class="p">,</span><span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+  <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">'Tag'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span><span class="o">+</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>O
+B-geo
+B-gpe
+B-per
+I-geo
+B-org
+I-org
+B-tim
+B-art
+I-art
+I-per
+I-gpe
+I-tim
+B-nat
+B-eve
+I-eve
+I-nat
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Download-Finetuning-Code-from-Transformers-Package">
+<a class="anchor" href="#Download-Finetuning-Code-from-Transformers-Package" aria-hidden="true"><span class="octicon octicon-link"></span></a>Download Finetuning Code from Transformers Package<a class="anchor-link" href="#Download-Finetuning-Code-from-Transformers-Package"> </a>
+</h3>
+<p>Download following files from transformers github repo.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>wget https://raw.githubusercontent.com/huggingface/transformers/master/examples/token-classification/utils_ner.py
+<span class="o">!</span>wget https://raw.githubusercontent.com/huggingface/transformers/master/examples/token-classification/run_ner.py
+<span class="o">!</span>wget https://raw.githubusercontent.com/huggingface/transformers/master/examples/token-classification/tasks.py
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Training-Code">
+<a class="anchor" href="#Training-Code" aria-hidden="true"><span class="octicon octicon-link"></span></a>Training Code<a class="anchor-link" href="#Training-Code"> </a>
+</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The datafiles are converted into Input Example and and input features using the tasks.py NER class. The run_ner.py takes care of converting</p>
+<blockquote>
+<p>Datafile -&gt; InputExample -&gt; InputFeature -&gt; Dataset -&gt; DataLoader</p>
+</blockquote>
+<p>which is required for Training Loop. We can simply run the run_ner.py file with all the required parameters.</p>
+<p>We will perform training using run_ner.py but before that let us look at how the InputExample and InputFeature looks like</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">tasks</span> <span class="kn">import</span> <span class="n">NER</span>
+<span class="n">task</span> <span class="o">=</span> <span class="n">NER</span><span class="p">()</span>
+
+<span class="n">examples</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">read_examples_from_file</span><span class="p">(</span><span class="s1">'/content/drive/My Drive/transformers-ner/data'</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span> <span class="s1">'train'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">examples</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[InputExample(guid='train-1', words=['South', 'Korea', "'s", 'government', 'Tuesday', 'also', 'unveiled', 'a', 'so-called', 'Green', 'New', 'Job', 'Creation', 'Plan', ',', 'expected', 'to', 'create', '9,60,000', 'new', 'jobs', '.'], labels=['B-geo', 'I-geo', 'O', 'O', 'B-tim', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']),
+ InputExample(guid='train-2', words=['When', 'the', 'Lion', 'found', 'that', 'he', 'could', 'not', 'escape', ',', 'he', 'flew', 'upon', 'the', 'sheep', 'and', 'killed', 'them', ',', 'and', 'then', 'attacked', 'the', 'oxen', '.'], labels=['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'])]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">LABELS_FILE_PATH</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+  <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span><span class="s1">''</span><span class="p">))</span>
+<span class="n">labels</span> 
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>['O',
+ 'B-geo',
+ 'B-gpe',
+ 'B-per',
+ 'I-geo',
+ 'B-org',
+ 'I-org',
+ 'B-tim',
+ 'B-art',
+ 'I-art',
+ 'I-per',
+ 'I-gpe',
+ 'I-tim',
+ 'B-nat',
+ 'B-eve',
+ 'I-eve',
+ 'I-nat']</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">AutoTokenizer</span>
+<span class="n">tokenizer</span><span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s1">'roberta-base'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">features</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">convert_examples_to_features</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span><span class="n">label_list</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">features</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[InputFeatures(input_ids=[3, 10050, 530, 33594, 18, 11455, 25464, 19726, 879, 548, 6691, 102, 2527, 12, 4155, 19247, 4030, 43128, 40008, 1258, 35351, 6, 10162, 560, 32845, 466, 6, 2466, 6, 151, 4651, 41207, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], attention_mask=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], token_type_ids=None, label_ids=[-100, 1, 4, -100, 0, 0, 7, 0, 0, -100, -100, 0, 0, -100, -100, 0, 0, 0, 0, -100, 0, 0, 0, 0, 0, 0, -100, -100, -100, -100, 0, 0, 0, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100]),
+ InputFeatures(input_ids=[3, 1779, 627, 574, 1499, 19256, 6025, 700, 17304, 3654, 46230, 6, 700, 40307, 605, 32630, 627, 8877, 2462, 463, 39132, 35369, 6, 463, 13040, 2611, 10074, 627, 4325, 225, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], attention_mask=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], token_type_ids=None, label_ids=[-100, 0, 0, 0, -100, 0, 0, 0, 0, 0, 0, 0, 0, 0, -100, 0, 0, 0, -100, 0, 0, 0, 0, 0, 0, 0, -100, 0, 0, -100, 0, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100])]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>python run_ner.py  --model_name_or_path <span class="s1">'roberta-base'</span><span class="err">\</span>
+ <span class="o">--</span><span class="n">labels</span> <span class="s1">'/content/drive/My Drive/transformers-ner/data/labels.txt'</span> \
+<span class="o">--</span><span class="n">data_dir</span> <span class="s1">'/content/drive/My Drive/transformers-ner/data'</span> \
+<span class="o">--</span><span class="n">output_dir</span> <span class="s1">'model'</span> \
+<span class="o">--</span><span class="n">max_seq_length</span>  <span class="s1">'128'</span> \
+<span class="o">--</span><span class="n">num_train_epochs</span> <span class="mi">3</span> \
+<span class="o">--</span><span class="n">per_device_train_batch_size</span> <span class="mi">8</span> \
+<span class="o">--</span><span class="n">save_steps</span> <span class="mi">1000000</span> \
+<span class="o">--</span><span class="n">seed</span> <span class="mi">16</span> \
+<span class="o">--</span><span class="n">do_train</span> \
+<span class="o">--</span><span class="n">do_predict</span> \
+<span class="o">--</span><span class="n">overwrite_output_dir</span> \
+<span class="o">--</span><span class="n">fp16</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Change the per_device_train_batch_size if you are facing out of memory issues.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Model-Prediction">
+<a class="anchor" href="#Model-Prediction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Model Prediction<a class="anchor-link" href="#Model-Prediction"> </a>
+</h2>
+<p>Once the model is trained, the final model weights, configuration, tokenizer will be avilable in the output_dir. We will use the Pipeline module to do the model predictions.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="n">model_name</span> <span class="o">=</span> <span class="s1">'/content/drive/My Drive/transformers-ner/model'</span>
+<span class="n">nlp</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="s2">"ner"</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">framework</span><span class="o">=</span><span class="s2">"pt"</span><span class="p">,</span><span class="n">grouped_entities</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sequence</span> <span class="o">=</span> <span class="s2">"""Today there is a cricket match between India and Pakistan. It will start at 2pm."""</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">nlp</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+<span class="n">result</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[{'entity': 'B-tim', 'index': 1, 'score': 0.9991254210472107, 'word': 'Today'},
+ {'entity': 'B-geo',
+  'index': 8,
+  'score': 0.7912563681602478,
+  'word': 'ĠIndia'},
+ {'entity': 'B-geo',
+  'index': 10,
+  'score': 0.6456469893455505,
+  'word': 'ĠPakistan'},
+ {'entity': 'B-tim', 'index': 16, 'score': 0.9949015378952026, 'word': 'Ġ2'},
+ {'entity': 'I-tim', 'index': 17, 'score': 0.9689693450927734, 'word': 'pm'}]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nlp</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="s2">"ner"</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">framework</span><span class="o">=</span><span class="s2">"pt"</span><span class="p">,</span><span class="n">grouped_entities</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">nlp</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+<span class="n">result</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[{'entity_group': 'B-tim', 'score': 0.9991254210472107, 'word': 'Today'},
+ {'entity_group': 'B-geo', 'score': 0.7912563681602478, 'word': ' India'},
+ {'entity_group': 'B-geo', 'score': 0.6456469893455505, 'word': ' Pakistan'},
+ {'entity_group': 'B-tim', 'score': 0.981935441493988, 'word': ' 2pm'}]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sequence</span> <span class="o">=</span> <span class="s2">"""Anjali wants to visit her hometown, Indore."""</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">nlp</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+<span class="n">result</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[{'entity_group': 'B-per', 'score': 0.7862346569697062, 'word': 'Anjali'},
+ {'entity_group': 'B-geo', 'score': 0.6435018926858902, 'word': ' Indore'}]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will try Training Token Classification for one more dataset in Part-3 to see how easy it is do the prediction and training for any dataset.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="crazycloud/dl-blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/nlp/token%20classification/2020/09/19/_09_20_Entity_Extraction_Transformers_Part_2.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>Musings on AI, Life, and apparently Trivial matters</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/crazycloud" title="crazycloud"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
