@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Entity Extraction (NER) - Training and Inference using Transformers - Part 3 | forgetfulcrow</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="Entity Extraction (NER) - Training and Inference using Transformers - Part 3" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function" />
+<meta property="og:description" content="Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function" />
+<link rel="canonical" href="http://forgetfulcrow.com/nlp/token%20classification/2020/09/20/_09_20_Entity_Extraction_Transformers_Part_3.html" />
+<meta property="og:url" content="http://forgetfulcrow.com/nlp/token%20classification/2020/09/20/_09_20_Entity_Extraction_Transformers_Part_3.html" />
+<meta property="og:site_name" content="forgetfulcrow" />
+<meta property="og:image" content="http://forgetfulcrow.com/images/transformers-ner-part1.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-09-20T00:00:00-05:00" />
+<script type="application/ld+json">
+{"description":"Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function","@type":"BlogPosting","headline":"Entity Extraction (NER) - Training and Inference using Transformers - Part 3","url":"http://forgetfulcrow.com/nlp/token%20classification/2020/09/20/_09_20_Entity_Extraction_Transformers_Part_3.html","datePublished":"2020-09-20T00:00:00-05:00","dateModified":"2020-09-20T00:00:00-05:00","image":"http://forgetfulcrow.com/images/transformers-ner-part1.png","mainEntityOfPage":{"@type":"WebPage","@id":"http://forgetfulcrow.com/nlp/token%20classification/2020/09/20/_09_20_Entity_Extraction_Transformers_Part_3.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://forgetfulcrow.com/feed.xml" title="forgetfulcrow" /><link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Entity Extraction (NER) - Training and Inference using Transformers - Part 3 | forgetfulcrow</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="Entity Extraction (NER) - Training and Inference using Transformers - Part 3" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function" />
+<meta property="og:description" content="Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function" />
+<link rel="canonical" href="http://forgetfulcrow.com/nlp/token%20classification/2020/09/20/_09_20_Entity_Extraction_Transformers_Part_3.html" />
+<meta property="og:url" content="http://forgetfulcrow.com/nlp/token%20classification/2020/09/20/_09_20_Entity_Extraction_Transformers_Part_3.html" />
+<meta property="og:site_name" content="forgetfulcrow" />
+<meta property="og:image" content="http://forgetfulcrow.com/images/transformers-ner-part1.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-09-20T00:00:00-05:00" />
+<script type="application/ld+json">
+{"description":"Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function","@type":"BlogPosting","headline":"Entity Extraction (NER) - Training and Inference using Transformers - Part 3","url":"http://forgetfulcrow.com/nlp/token%20classification/2020/09/20/_09_20_Entity_Extraction_Transformers_Part_3.html","datePublished":"2020-09-20T00:00:00-05:00","dateModified":"2020-09-20T00:00:00-05:00","image":"http://forgetfulcrow.com/images/transformers-ner-part1.png","mainEntityOfPage":{"@type":"WebPage","@id":"http://forgetfulcrow.com/nlp/token%20classification/2020/09/20/_09_20_Entity_Extraction_Transformers_Part_3.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
+<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="http://forgetfulcrow.com/feed.xml" title="forgetfulcrow" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head><body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">forgetfulcrow</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About Me</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Entity Extraction (NER) - Training and Inference using Transformers - Part 3</h1><p class="page-description">Learn to train a NER model using Transformers Trainer Class, and to run Inference using Pipeline function</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-09-20T00:00:00-05:00" itemprop="datePublished">
+        Sep 20, 2020
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      1 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/categories/#nlp">nlp</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#token classification">token classification</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/crazycloud/dl-blog/tree/master/_notebooks/2020_09_20_Entity_Extraction_Transformers_Part_3.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/crazycloud/dl-blog/master?filepath=_notebooks%2F2020_09_20_Entity_Extraction_Transformers_Part_3.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/crazycloud/dl-blog/blob/master/_notebooks/2020_09_20_Entity_Extraction_Transformers_Part_3.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h2"><a href="#Download-the-Restaurant-Intent-Dataset">Download the Restaurant Intent Dataset </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Convert-datafile-to-conllu-input-format-for-processing-with-NER-Task-Class">Convert datafile to conllu input format for processing with NER Task Class </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#Run-the-Training-Code">Run the Training Code </a></li>
+<li class="toc-entry toc-h2"><a href="#Model-Prediction">Model Prediction </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2020_09_20_Entity_Extraction_Transformers_Part_3.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a href="https://colab.research.google.com/github/crazycloud/dl-blog/blob/master/_notebooks/2020_09_20_Entity_Extraction_Transformers_Part_3.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In the previous post we trained the NER model for a kaggle dataset. In this post we will train an Entity Extraction model on a MIT restaurant intent dataset. Please follow the previous posts to understand the whole process of token classification using a pretrained model in Transformers.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">google.colab</span> <span class="kn">import</span> <span class="n">drive</span>
+<span class="n">drive</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s1">'/content/drive'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Mounted at /content/drive
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>pip install git+https://github.com/huggingface/transformers.git
+<span class="o">!</span>pip install seqeval
+<span class="o">!</span>pip install conllu
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Download-the-Restaurant-Intent-Dataset">
+<a class="anchor" href="#Download-the-Restaurant-Intent-Dataset" aria-hidden="true"><span class="octicon octicon-link"></span></a>Download the Restaurant Intent Dataset<a class="anchor-link" href="#Download-the-Restaurant-Intent-Dataset"> </a>
+</h2>
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>wget https://groups.csail.mit.edu/sls/downloads/restaurant/restauranttrain.bio 
+<span class="o">!</span>wget https://groups.csail.mit.edu/sls/downloads/restaurant/restauranttest.bio 
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The data is present in the following format</p>
+<p><code>O</code> a<br>
+<code>B-Rating</code>  four<br>
+<code>I-Rating</code>  star<br>
+<code>O</code> restaurant<br>
+<code>B-Location</code>    with<br>
+<code>I-Location</code>    a<br>
+<code>B-Amenity</code> bar</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Convert-datafile-to-conllu-input-format-for-processing-with-NER-Task-Class">
+<a class="anchor" href="#Convert-datafile-to-conllu-input-format-for-processing-with-NER-Task-Class" aria-hidden="true"><span class="octicon octicon-link"></span></a>Convert datafile to conllu input format for processing with <a href="https://github.com/huggingface/transformers/blob/4f6e52574248636352a746cfe6cc0b13cf3eb7f9/examples/token-classification/tasks.py">NER Task Class</a><a class="anchor-link" href="#Convert-datafile-to-conllu-input-format-for-processing-with-NER-Task-Class"> </a>
+</h3>
+<ol>
+<li>
+<p>Reverse the tag and the column column in both the test and train files.</p>
+</li>
+<li>
+<p>Replace the tab seperator to space.</p>
+</li>
+<li>
+<p>Change the example seperator to newline</p>
+</li>
+</ol>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>awk <span class="s1">'{print $2,$1}'</span> restauranttest.bio &gt; <span class="s2">"/content/drive/My Drive/transformers-ner/mit-restaurant-data/test.txt"</span>
+<span class="o">!</span>awk <span class="s1">'{print $2,$1}'</span> restauranttrain.bio &gt; <span class="s2">"/content/drive/My Drive/transformers-ner/mit-restaurant-data/train.txt"</span>
+<span class="o">!</span>sed -i <span class="s1">'s/\t/ /g'</span> <span class="s1">'/content/drive/My Drive/transformers-ner/mit-restaurant-data/test.txt'</span> 
+<span class="o">!</span>sed -i <span class="s1">'s/^ $/\n/g'</span> <span class="s1">'/content/drive/My Drive/transformers-ner/mit-restaurant-data/test.txt'</span>
+<span class="o">!</span>sed -i <span class="s1">'s/\t/ /g'</span> <span class="s1">'/content/drive/My Drive/transformers-ner/mit-restaurant-data/train.txt'</span> 
+<span class="o">!</span>sed -i <span class="s1">'s/^ $/\n/g'</span> <span class="s1">'/content/drive/My Drive/transformers-ner/mit-restaurant-data/train.txt'</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span> 
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'/content/drive/My Drive/transformers-ner/mit-restaurant-data/train.txt'</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s1">' '</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">'/content/drive/My Drive/transformers-ner/mit-restaurant-data/labels.txt'</span><span class="p">,</span><span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">fout</span><span class="p">:</span>
+  <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+    <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tag</span><span class="o">+</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>wget https://raw.githubusercontent.com/huggingface/transformers/master/examples/token-classification/utils_ner.py
+<span class="o">!</span>wget https://raw.githubusercontent.com/huggingface/transformers/master/examples/token-classification/run_ner.py
+<span class="o">!</span>wget https://raw.githubusercontent.com/huggingface/transformers/master/examples/token-classification/tasks.py
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Run-the-Training-Code">
+<a class="anchor" href="#Run-the-Training-Code" aria-hidden="true"><span class="octicon octicon-link"></span></a>Run the Training Code<a class="anchor-link" href="#Run-the-Training-Code"> </a>
+</h2>
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>python run_ner.py  --model_name_or_path <span class="s1">'roberta-base'</span>  <span class="err">\</span>
+<span class="o">--</span><span class="n">data_dir</span> <span class="s1">'/content/drive/My Drive/transformers-ner/mit-restaurant-data/'</span> \
+<span class="o">--</span><span class="n">output_dir</span> <span class="s1">'restaurant-model'</span> \
+<span class="o">--</span><span class="n">max_seq_length</span> <span class="s1">'128'</span> \
+<span class="o">--</span><span class="n">num_train_epochs</span> <span class="mi">3</span> \
+<span class="o">--</span><span class="n">per_device_train_batch_size</span> <span class="mi">8</span> \
+<span class="o">--</span><span class="n">save_steps</span> <span class="mi">1000000</span> \
+<span class="o">--</span><span class="n">seed</span> <span class="mi">16</span> \
+<span class="o">--</span><span class="n">do_train</span> \
+<span class="o">--</span><span class="n">do_predict</span> \
+<span class="o">--</span><span class="n">overwrite_output_dir</span> \
+<span class="o">--</span><span class="n">labels</span> <span class="s2">"/content/drive/My Drive/transformers-ner/mit-restaurant-data/labels.txt"</span> \
+<span class="o">--</span><span class="n">fp16</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The model training achieves an accuracy score of 91% on the test dataset.</p>
+<p>eval_loss = 0.29688322173849724<br>
+eval_accuracy_score = 0.9196127946127947<br>
+eval_precision = 0.7854288349216109<br>
+eval_recall = 0.8108536972389717<br>
+eval_f1 = 0.7979387882573391</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Model-Prediction">
+<a class="anchor" href="#Model-Prediction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Model Prediction<a class="anchor-link" href="#Model-Prediction"> </a>
+</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Run the prediction using the pipeline class</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="n">model_name</span> <span class="o">=</span> <span class="s1">'/content/restaurant-model'</span>
+<span class="n">nlp</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="s2">"ner"</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">framework</span><span class="o">=</span><span class="s2">"pt"</span><span class="p">,</span><span class="n">grouped_entities</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sequence</span> <span class="o">=</span><span class="p">[</span><span class="s2">"""how many 5 star restaurants are near me."""</span><span class="p">,</span><span class="s2">"Which restaurant in Downtown serves best Momos?"</span><span class="p">]</span>
+<span class="n">nlp</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[[{'entity_group': 'B-Rating', 'score': 0.9906011819839478, 'word': ' 5 star'},
+  {'entity_group': 'B-Location',
+   'score': 0.927771806716919,
+   'word': ' near me'}],
+ [{'entity_group': 'B-Location',
+   'score': 0.6126553416252136,
+   'word': ' in Downtown'},
+  {'entity_group': 'B-Rating', 'score': 0.9742729663848877, 'word': ' best'},
+  {'entity_group': 'B-Dish', 'score': 0.990350604057312, 'word': ' Momos'}]]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="crazycloud/dl-blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/nlp/token%20classification/2020/09/20/_09_20_Entity_Extraction_Transformers_Part_3.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>Musings on AI, Life, and apparently Trivial matters</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/crazycloud" title="crazycloud"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
